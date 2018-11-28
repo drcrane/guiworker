@@ -1,0 +1,7 @@
+.vs/
+Win32/
+x64/
+guiworker.vcxproj.filters
+guiworker.vcxproj.user
+*.aps
+
