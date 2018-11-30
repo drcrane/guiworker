@@ -1,6 +1,9 @@
 #include "guiworker.h"
 #include "resource.h"
 #include "workerthread.h"
+#include "simpledelegate.h"
+#include <thread>
+#include <functional>
 
 #include <malloc.h>
 
@@ -53,6 +56,37 @@ void * GUIWorkerForm::ExecuteTaskAWt(GUIWorkerForm * me, void * args) {
 	return nullptr;
 }
 
+int GUIWorkerForm::ExecuteTaskB() {
+	SendDlgItemMessageW(this->dialog_hwnd, IDC_TASKBSTATUSSTATIC, WM_SETTEXT, (WPARAM)0, (LPARAM)L"Running Longer Task...");
+	EnableWindow(GetDlgItem(this->dialog_hwnd, IDC_EXECUTETASKBBUTTON), FALSE);
+
+	Delegate<GUIWorkerForm, void *, std::string *>* deleg = new Delegate<GUIWorkerForm, void *, std::string *>(this, &GUIWorkerForm::ExecuteTaskBWt);
+	std::string * string = new std::string("Welcomeee");
+	DelegateArguments1<std::string *>* deleg_arg = new DelegateArguments1<std::string *>(deleg, string);
+	
+	// Invoke from this thread... somewhat defeats the object!
+	//deleg_arg->GetDelegateInvoker()->Invoke(reinterpret_cast<DelegateArguments*>(deleg_arg));
+	//delete string;
+	
+	DelegateInvoker* deleg_inv = deleg_arg->GetDelegateInvoker();
+
+	int res;
+	res = workerthread_enqueue(this->workerthread_ctx, (workerthread_function_t)&DelegateInvoker::StaticInvoke, (void *)deleg_inv, (void *)deleg_arg);
+
+	//std::thread my_thread = std::thread(&DelegateInvoker::Invoke, deleg_inv, deleg_arg);
+	//my_thread.detach();
+
+	return 0;
+}
+
+void * GUIWorkerForm::ExecuteTaskBWt(std::string* args) {
+	Sleep(1000);
+	SendDlgItemMessageA(this->dialog_hwnd, IDC_TASKBSTATUSSTATIC, WM_SETTEXT, (WPARAM)0, (LPARAM)(*args).c_str());
+	EnableWindow(GetDlgItem(this->dialog_hwnd, IDC_EXECUTETASKBBUTTON), TRUE);
+	delete args;
+	return NULL;
+}
+
 GUIWorkerForm::~GUIWorkerForm() {
 	workerthread_shutdown(this->workerthread_ctx);
 }
@@ -73,6 +107,7 @@ INT_PTR CALLBACK GUIWorkerFormProc(HWND hwndDlg, UINT uMsg, WPARAM wParam, LPARA
 			guiworkerform->ExecuteTaskA();
 			break;
 		case IDC_EXECUTETASKBBUTTON:
+			guiworkerform->ExecuteTaskB();
 			break;
 		default:
 			break;

@@ -126,6 +126,7 @@
   <ItemGroup>
     <ClInclude Include="guiworker.h" />
     <ClInclude Include="resource.h" />
+    <ClInclude Include="simpledelegate.h" />
     <ClInclude Include="workerthread.h" />
   </ItemGroup>
   <ItemGroup>
@@ -133,6 +134,7 @@
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="guiworker.cpp" />
+    <ClCompile Include="simpledelegate.cpp" />
     <ClCompile Include="workerthread.c" />
   </ItemGroup>
   <ItemGroup>
