@@ -4,4 +4,6 @@ x64/
 guiworker.vcxproj.filters
 guiworker.vcxproj.user
 *.aps
+*.o
+*.exe
 

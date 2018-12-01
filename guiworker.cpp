@@ -56,11 +56,26 @@ void * GUIWorkerForm::ExecuteTaskAWt(GUIWorkerForm * me, void * args) {
 	return nullptr;
 }
 
+#if 1
+int GUIWorkerForm::ExecuteTaskB() {
+	SendDlgItemMessageW(this->dialog_hwnd, IDC_TASKBSTATUSSTATIC, WM_SETTEXT, (WPARAM)0, (LPARAM)L"Running Longer Task...");
+	EnableWindow(GetDlgItem(this->dialog_hwnd, IDC_EXECUTETASKBBUTTON), FALSE);
+	
+	std::string* param = new std::string("Welcome");
+	//DelegateArguments* deleg = CreateInvokableDelegate(this, &GUIWorkerForm::ExecuteTaskBWt, param);
+	//workerthread_enqueue(this->workerthread_ctx, (workerthread_function_t)&DelegateArguments::StaticInvoke, (void *)deleg, (void *)nullptr);
+	
+	InvokeInWorkerThread(this->workerthread_ctx, this, &GUIWorkerForm::ExecuteTaskBWt, param);
+	return 0;
+}
+#endif
+
+#if 0
 int GUIWorkerForm::ExecuteTaskB() {
 	SendDlgItemMessageW(this->dialog_hwnd, IDC_TASKBSTATUSSTATIC, WM_SETTEXT, (WPARAM)0, (LPARAM)L"Running Longer Task...");
 	EnableWindow(GetDlgItem(this->dialog_hwnd, IDC_EXECUTETASKBBUTTON), FALSE);
 
-	Delegate<GUIWorkerForm, void *, std::string *>* deleg = new Delegate<GUIWorkerForm, void *, std::string *>(this, &GUIWorkerForm::ExecuteTaskBWt);
+	Delegate1<GUIWorkerForm, void *, std::string *>* deleg = new Delegate1<GUIWorkerForm, void *, std::string *>(this, &GUIWorkerForm::ExecuteTaskBWt);
 	std::string * string = new std::string("Welcomeee");
 	DelegateArguments1<std::string *>* deleg_arg = new DelegateArguments1<std::string *>(deleg, string);
 	
@@ -69,15 +84,17 @@ int GUIWorkerForm::ExecuteTaskB() {
 	//delete string;
 	
 	DelegateInvoker* deleg_inv = deleg_arg->GetDelegateInvoker();
+	DelegateArguments* deleg_arg2 = deleg_arg;
 
 	int res;
-	res = workerthread_enqueue(this->workerthread_ctx, (workerthread_function_t)&DelegateInvoker::StaticInvoke, (void *)deleg_inv, (void *)deleg_arg);
+	res = workerthread_enqueue(this->workerthread_ctx, this, (workerthread_function_t)&DelegateInvoker::StaticInvoke, (void *)deleg_inv, (void *)deleg_arg2);
 
 	//std::thread my_thread = std::thread(&DelegateInvoker::Invoke, deleg_inv, deleg_arg);
 	//my_thread.detach();
 
 	return 0;
 }
+#endif
 
 void * GUIWorkerForm::ExecuteTaskBWt(std::string* args) {
 	Sleep(1000);
@@ -114,9 +131,10 @@ INT_PTR CALLBACK GUIWorkerFormProc(HWND hwndDlg, UINT uMsg, WPARAM wParam, LPARA
 		}
 		break;
 	}
-	return NULL;
+	return (INT_PTR)NULL;
 }
 
 int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPSTR lpCmdLine, int nCmdShow) {
 	DialogBox(hInstance, MAKEINTRESOURCE(IDD_GUIWORKERFORM), NULL, &GUIWorkerFormProc);
+	return 0;
 }
