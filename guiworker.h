@@ -26,7 +26,7 @@ public:
 	static void * ExecuteTaskAWt(GUIWorkerForm * me, void * args);
 	int ExecuteTaskB();
 	//static void * ExecuteTaskB(GUIWorkerForm * me, void * args);
-	void * ExecuteTaskBWt(std::string* args);
+	void * ExecuteTaskBWt(unsigned long int delay);
 
 private:
 	HWND dialog_hwnd;

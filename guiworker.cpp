@@ -58,14 +58,22 @@ void * GUIWorkerForm::ExecuteTaskAWt(GUIWorkerForm * me, void * args) {
 
 #if 1
 int GUIWorkerForm::ExecuteTaskB() {
-	SendDlgItemMessageW(this->dialog_hwnd, IDC_TASKBSTATUSSTATIC, WM_SETTEXT, (WPARAM)0, (LPARAM)L"Running Longer Task...");
-	EnableWindow(GetDlgItem(this->dialog_hwnd, IDC_EXECUTETASKBBUTTON), FALSE);
-	
-	std::string* param = new std::string("Welcome");
-	//DelegateArguments* deleg = CreateInvokableDelegate(this, &GUIWorkerForm::ExecuteTaskBWt, param);
-	//workerthread_enqueue(this->workerthread_ctx, (workerthread_function_t)&DelegateArguments::StaticInvoke, (void *)deleg, (void *)nullptr);
-	
-	InvokeInWorkerThread(this->workerthread_ctx, this, &GUIWorkerForm::ExecuteTaskBWt, param);
+	if (IsDlgButtonChecked(this->dialog_hwnd, IDC_LONGTASKBRADIO) == BST_CHECKED) {
+		if (InvokeInWorkerThread(this->workerthread_ctx, this, &GUIWorkerForm::ExecuteTaskBWt, (unsigned long int)1000)) {
+			SendDlgItemMessageW(this->dialog_hwnd, IDC_TASKBSTATUSSTATIC, WM_SETTEXT, (WPARAM)0, (LPARAM)L"Error Queueing");
+			return 0;
+		}
+		SendDlgItemMessageW(this->dialog_hwnd, IDC_TASKBSTATUSSTATIC, WM_SETTEXT, (WPARAM)0, (LPARAM)L"Running Long Task...");
+		EnableWindow(GetDlgItem(this->dialog_hwnd, IDC_EXECUTETASKBBUTTON), FALSE);
+	}
+	if (IsDlgButtonChecked(this->dialog_hwnd, IDC_LONGERTASKBRADIO) == BST_CHECKED) {
+		if (InvokeInWorkerThread(this->workerthread_ctx, this, &GUIWorkerForm::ExecuteTaskBWt, (unsigned long int)5000)) {
+			SendDlgItemMessageW(this->dialog_hwnd, IDC_TASKBSTATUSSTATIC, WM_SETTEXT, (WPARAM)0, (LPARAM)L"Error Queueing");
+			return 0;
+		}
+		SendDlgItemMessageW(this->dialog_hwnd, IDC_TASKBSTATUSSTATIC, WM_SETTEXT, (WPARAM)0, (LPARAM)L"Running Longer Task...");
+		EnableWindow(GetDlgItem(this->dialog_hwnd, IDC_EXECUTETASKBBUTTON), FALSE);
+	}
 	return 0;
 }
 #endif
@@ -96,11 +104,10 @@ int GUIWorkerForm::ExecuteTaskB() {
 }
 #endif
 
-void * GUIWorkerForm::ExecuteTaskBWt(std::string* args) {
-	Sleep(1000);
-	SendDlgItemMessageA(this->dialog_hwnd, IDC_TASKBSTATUSSTATIC, WM_SETTEXT, (WPARAM)0, (LPARAM)(*args).c_str());
+void * GUIWorkerForm::ExecuteTaskBWt(unsigned long int delay) {
+	Sleep(delay);
+	SendDlgItemMessageW(this->dialog_hwnd, IDC_TASKBSTATUSSTATIC, WM_SETTEXT, (WPARAM)0, (LPARAM)L"Finished");
 	EnableWindow(GetDlgItem(this->dialog_hwnd, IDC_EXECUTETASKBBUTTON), TRUE);
-	delete args;
 	return NULL;
 }
 
