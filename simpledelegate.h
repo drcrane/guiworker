@@ -51,6 +51,13 @@ public:
 		this->m_object = object;
 		this->m_func = func;
 	}
+
+	virtual void Invoke(DelegateArguments* args_ptr) {
+		DelegateArguments* args = (DelegateArguments*)args_ptr;
+		(*m_object.*m_func)();
+		delete args;
+		delete this;
+	}
 private:
 	ObjectPtr m_object;
 	MemberFunc m_func;
@@ -158,6 +165,13 @@ private:
 	ObjectPtr m_object;
 	MemberFunc m_func;
 };
+
+template<class TClass, typename Ret>
+DelegateArguments* CreateInvokableDelegate(TClass* object, Ret(TClass::*func)()) {
+	Delegate0<TClass, Ret>* deleg = new Delegate0<TClass, Ret>(object, func);
+	DelegateArguments* deleg_arg = new DelegateArguments(deleg);
+	return deleg_arg;
+}
 
 template<class TClass, typename Ret, typename Param1>
 DelegateArguments1<Param1>* CreateInvokableDelegate(TClass* object, Ret (TClass::*func)(Param1), Param1 param1) {

@@ -1,9 +1,8 @@
 #include "simpledelegate.h"
 
 void DelegateInvoker::Invoke(DelegateArguments * args) {
-	//args->GetDelegateInvoker()->Invoke(args);
-	//delete args->GetDelegateInvoker();
-	//delete args;
+	// Default Implementation for Virtual Function
+	// Actually Delegate0::Invoke should be called...
 }
 
 void * DelegateInvoker::StaticInvoke(DelegateInvoker* invoker, DelegateArguments* args) {
